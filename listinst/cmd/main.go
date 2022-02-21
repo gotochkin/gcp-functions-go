@@ -6,6 +6,7 @@ import (
   //"golang.org/x/oauth2/google"
   "gleb.ca/listinstances"
   "fmt"
+  "strconv"
   //"strings"
   "log"
 )
@@ -26,13 +27,9 @@ func main() {
     if err != nil {
       log.Fatalln(err)
     }
-    machines := make([]Machine, len(listInstances))
     for i, instance := range listInstances {
       //m := strings(instance)
-      machines[i] = Machine {
-        Name: instance.Name,
-      }
-      fmt.Printf(machines.Name)
+      fmt.Println("Number: %s: instance name: %s",strconv.Itoa(i),instance.Name)
     }
   }
 }
