@@ -7,7 +7,6 @@ import (
   "gleb.ca/listinstances"
   "fmt"
   "strconv"
-  //"strings"
   "log"
 )
 func main() {
@@ -28,8 +27,8 @@ func main() {
       log.Fatalln(err)
     }
     for i, instance := range listInstances {
-      //m := strings(instance)
-      fmt.Printf("Number: %s: instance name: %s",strconv.Itoa(i),instance.Name)
+      fmt.Printf("Number: %s instance name: %s\n",strconv.Itoa(i),instance.Name)
+      fmt.Println("Number:",strconv.Itoa(i),"instance name:",instance.Name)
     }
   }
 }
