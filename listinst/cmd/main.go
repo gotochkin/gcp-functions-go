@@ -29,7 +29,7 @@ func main() {
     }
     for i, instance := range listInstances {
       //m := strings(instance)
-      fmt.Println("Number: %s: instance name: %s",strconv.Itoa(i),instance.Name)
+      fmt.Printf("Number: %s: instance name: %s",strconv.Itoa(i),instance.Name)
     }
   }
 }
