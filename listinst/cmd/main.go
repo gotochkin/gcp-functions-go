@@ -31,6 +31,7 @@ func main() {
       fmt.Println("Number:",strconv.Itoa(i),
                   "instance name:",instance.Name,
                   "State:", instance.State,
+                  "Settings.ActivationPolicy:", instance.Settings.ActivationPolicy,
                 )
     }
   }

@@ -43,4 +43,24 @@ func ListInstances(projectId string) ([]*sqladmin.DatabaseInstance, error) {
 	}
 	return instances.Items, nil
 }
+func StartInstance(projectId string, instanceName string) ([]*sqladmin.DatabaseInstance, error) {
+	ctx := context.Background()
 
+	// Create an http.Client that uses Application Default Credentials.
+	hc, err := google.DefaultClient(ctx, sqladmin.SqlserviceAdminScope)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the Google Cloud SQL service.
+	service, err := sqladmin.New(hc)
+	if err != nil {
+		return nil, err
+	}
+	state, err := service.Instances.Update(projectId,instanceName).Do(o *Settings.ActivationPolicy){
+		o := "Always"
+	}
+	if err != nil {
+		return nil, err
+	}
+}

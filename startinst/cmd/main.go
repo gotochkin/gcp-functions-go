@@ -4,7 +4,7 @@ import (
   //"golang.org/x/net/context"
   //"google.golang.org/api/compute/v1"
   //"golang.org/x/oauth2/google"
-  "gleb.ca/listinstances"
+  "gleb.ca/startinstance"
   "fmt"
   "strconv"
   "log"
