@@ -57,9 +57,10 @@ func StartInstance(projectId string, instanceName string) ([]*sqladmin.DatabaseI
 	if err != nil {
 		return nil, err
 	}
-	state, err := service.Instances.Update(projectId,instanceName).Do(o *Settings.ActivationPolicy){
-		o := "Always"
-	}
+	state, err := service.Instances.Update(projectId,instanceName).Do
+	//(o *Settings.ActivationPolicy) {
+	//	o := "Always"
+	//}
 	if err != nil {
 		return nil, err
 	}
