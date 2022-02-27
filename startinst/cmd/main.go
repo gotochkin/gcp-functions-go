@@ -20,18 +20,17 @@ func main() {
   //  "name != my-uninteresting-instance-two",
   //}
   //instances, err := listinstances.ListInstances(project) if err != nil { log.Fatalln(err) }
+  instances := [...]string{
+    "mssqlinst01std-02-gleb-sandbox-01",
+  }
 
   for _, project := range projects {
-    listInstances, err := listinstances.ListInstances(project) 
-    if err != nil {
-      log.Fatalln(err)
-    }
-    for i, instance := range listInstances {
-      //fmt.Printf("Number: %s instance name: %s\n",strconv.Itoa(i),instance.Name)
-      fmt.Println("Number:",strconv.Itoa(i),
-                  "instance name:",instance.Name,
-                  "State:", instance.State,
-                )
+    for _, instance := range instances {
+      Instance, err := startinstance.StartInstance(project,instances)
+      if err != nil {
+        log.Fatalln(err)
+      }
+      fmt.Println(Instance.Name)
     }
   }
 }

@@ -43,7 +43,7 @@ func ListInstances(projectId string) ([]*sqladmin.DatabaseInstance, error) {
 	}
 	return instances.Items, nil
 }
-func StartInstance(projectId string, instanceName string) ([]*sqladmin.DatabaseInstance, error) {
+func StartInstance(projectId string, instanceName string) (*sqladmin.DatabaseInstance, error) {
 	ctx := context.Background()
 
 	// Create an http.Client that uses Application Default Credentials.
@@ -57,11 +57,16 @@ func StartInstance(projectId string, instanceName string) ([]*sqladmin.DatabaseI
 	if err != nil {
 		return nil, err
 	}
-	state, err := service.Instances.Update(projectId,instanceName).Do
+	instance, err := service.Instances.Get(projectId,instanceName).Do()
+	if err != nil {
+		return nil, err
+	}
+	//opupdate, err := service.Instances.Update(projectId,instanceName, instance).Do()
 	//(o *Settings.ActivationPolicy) {
 	//	o := "Always"
 	//}
 	if err != nil {
 		return nil, err
 	}
+	return instance, nil
 }
