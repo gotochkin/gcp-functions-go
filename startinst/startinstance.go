@@ -43,7 +43,7 @@ func ListInstances(projectId string) ([]*sqladmin.DatabaseInstance, error) {
 	}
 	return instances.Items, nil
 }
-func StartInstance(projectId string, instanceName string) (*sqladmin.DatabaseInstance, error) {
+func StartInstance(projectId string, instanceName string) (*sqladmin.Operation, error) {
 	ctx := context.Background()
 
 	// Create an http.Client that uses Application Default Credentials.
@@ -57,16 +57,58 @@ func StartInstance(projectId string, instanceName string) (*sqladmin.DatabaseIns
 	if err != nil {
 		return nil, err
 	}
-	instance, err := service.Instances.Get(projectId,instanceName).Do()
-	if err != nil {
-		return nil, err
+
+	mysetting := &sqladmin.Settings{
+		ActivationPolicy: "Always",
 	}
-	//opupdate, err := service.Instances.Update(projectId,instanceName, instance).Do()
+
+	instance := &sqladmin.DatabaseInstance{
+		Settings: mysetting,
+	}
+	//if err != nil {
+	//	return nil, err
+	//}
+	op, err := service.Instances.Patch(projectId, instanceName, instance).Do()
 	//(o *Settings.ActivationPolicy) {
 	//	o := "Always"
 	//}
 	if err != nil {
 		return nil, err
 	}
-	return instance, nil
+	return op, nil
+}
+
+func StopInstance(projectId string, instanceName string) (*sqladmin.Operation, error) {
+	ctx := context.Background()
+
+	// Create an http.Client that uses Application Default Credentials.
+	hc, err := google.DefaultClient(ctx, sqladmin.SqlserviceAdminScope)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the Google Cloud SQL service.
+	service, err := sqladmin.New(hc)
+	if err != nil {
+		return nil, err
+	}
+
+	mysetting := &sqladmin.Settings{
+		ActivationPolicy: "Never",
+	}
+
+	instance := &sqladmin.DatabaseInstance{
+		Settings: mysetting,
+	}
+	//if err != nil {
+	//	return nil, err
+	//}
+	op, err := service.Instances.Patch(projectId, instanceName, instance).Do()
+	//(o *Settings.ActivationPolicy) {
+	//	o := "Always"
+	//}
+	if err != nil {
+		return nil, err
+	}
+	return op, nil
 }

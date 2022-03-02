@@ -4,7 +4,7 @@ import (
   //"golang.org/x/net/context"
   //"google.golang.org/api/compute/v1"
   //"golang.org/x/oauth2/google"
-  "gleb.ca/startinstance"
+  "gleb.ca/backupinstance"
   "fmt"
   //"strconv"
   "log"
@@ -26,7 +26,7 @@ func main() {
 
   for _, project := range projects {
     for _, instance := range instances {
-      Instance, err := startinstance.StopInstance(project,instance)
+      Instance, err := backupinstance.BackupInstance(project,instance)
       if err != nil {
         log.Fatalln(err)
       }

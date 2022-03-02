@@ -32,7 +32,9 @@ func main() {
                   "instance name:",instance.Name,
                   "State:", instance.State,
                   "Settings.ActivationPolicy:", instance.Settings.ActivationPolicy,
+                  "Settings.SettingsVersion:", instance.Settings.SettingsVersion,
                 )
+      fmt.Printf("%#v\n",instance.BackupConfiguration)
     }
   }
 }
