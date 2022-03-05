@@ -26,7 +26,7 @@ func main() {
 
   for _, project := range projects {
     for _, instance := range instances {
-      Instance, err := startinstance.StopInstance(project,instance)
+      Instance, err := startinstance.StartInstance(project,instance)
       if err != nil {
         log.Fatalln(err)
       }

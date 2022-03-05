@@ -41,7 +41,8 @@ func BackupInstance(projectId string, instanceName string) (*sqladmin.Operation,
 	//}
 
 	backuprun := &sqladmin.BackupRun{
-		Location: "us",
+		Location: "us-central1",
+		Description: "Test us-central1",
 	}
 	//if err != nil {
 	//	return nil, err
