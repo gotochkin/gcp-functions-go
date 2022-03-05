@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Sample listinstances lists the Cloud SQL instances for a given project ID.
-package resizegke
+package gkeresize
 
 import (
 	"context"
