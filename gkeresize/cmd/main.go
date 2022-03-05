@@ -6,13 +6,13 @@ import (
   //"golang.org/x/oauth2/google"
   "gleb.ca/gkeresize"
   "fmt"
-  //"strconv"
+  "strconv"
   "log"
 )
 func main() {
   projects := [...]string{
     "gleb-sandbox",
-    //"asset-inventory-tester",
+    "asset-inventory-tester",
   }
   //filters := [...]string{
   //  "status = RUNNING",
@@ -25,14 +25,19 @@ func main() {
   //}
 
   for _, project := range projects {
-    listClusters, err := resizegke.ListClusters(project) 
+    parent := fmt.Sprintf("projects/%s/locations/-", project)
+    listClusters, err := gkeresize.ListClusters(parent) 
     if err != nil {
       log.Fatalln(err)
     }
-    for i, cluster := range listClusters {
+    fmt.Println(parent)
+    fmt.Printf("%#v\n",listClusters)
+    fmt.Println("Name:",listClusters.Clusters,)
+    for i, cluster := range listClusters.Clusters {
+      
       //fmt.Printf("Number: %s instance name: %s\n",strconv.Itoa(i),instance.Name)
       fmt.Println("Number:",strconv.Itoa(i),
-                  //"instance name:",instance.Name,
+                  "cluster name:",cluster.Name,
                   //"State:", instance.State,
                   //"Settings.ActivationPolicy:", instance.Settings.ActivationPolicy,
                   //"Settings.SettingsVersion:", instance.Settings.SettingsVersion,

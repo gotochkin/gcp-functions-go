@@ -18,22 +18,31 @@ package gkeresize
 import (
 	"context"
 	"golang.org/x/oauth2/google"
-	sqladmin "google.golang.org/api/container/v1beta1"
+	container "google.golang.org/api/container/v1beta1"
 )
 
-func ListClusters(projectId string) ([]*container.Cluster, error) {
+func ListClusters(parent string) (*container.ListClustersResponse, error) {
 	ctx := context.Background()
 
-	// Create the Google Cloud GKE service that uses Application Default Credentials.
-	service, err := container.NewService(ctx)
+	// Create an http.Client that uses Application Default Credentials.
+	hc, err := google.DefaultClient(ctx, container.CloudPlatformScope)
 	if err != nil {
 		return nil, err
 	}
 
-	// List clusters for the project ID.
-	clusters, err := service.ProjectsLocationsClustersService.List(projectId).Do()
+	// Create the Google Cloud GKE service that uses Application Default Credentials.
+	service, err := container.New(hc)
 	if err != nil {
 		return nil, err
 	}
-	return clusters.ListClustersResponse, nil
+	// Service -> ProjectsService -> ProjectsLocationsService -> List(projectID)  ProjectsLocationsClustersService?
+	//cs. err := 
+
+	// List clusters for the project ID.
+	
+	clusters, err := service.Projects.Locations.Clusters.List(parent).Do()
+	if err != nil {
+		return nil, err
+	}
+	return clusters, nil
 }
