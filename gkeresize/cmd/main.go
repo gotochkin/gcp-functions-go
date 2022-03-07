@@ -14,6 +14,9 @@ func main() {
     "gleb-sandbox",
     "asset-inventory-tester",
   }
+  clusternames := [...]string{
+    "us-sandbox-cluster-2",
+  }
   //filters := [...]string{
   //  "status = RUNNING",
   //  "name != my-uninteresting-instance-one",
@@ -30,19 +33,30 @@ func main() {
     if err != nil {
       log.Fatalln(err)
     }
-    fmt.Println(parent)
-    fmt.Printf("%#v\n",listClusters)
-    fmt.Println("Name:",listClusters.Clusters,)
+    //fmt.Println(parent)
+    //fmt.Printf("%#v\n",listClusters)
+    //fmt.Println("Name:",listClusters.Clusters,)
     for i, cluster := range listClusters.Clusters {
-      
-      //fmt.Printf("Number: %s instance name: %s\n",strconv.Itoa(i),instance.Name)
-      fmt.Println("Number:",strconv.Itoa(i),
-                  "cluster name:",cluster.Name,
-                  //"State:", instance.State,
-                  //"Settings.ActivationPolicy:", instance.Settings.ActivationPolicy,
-                  //"Settings.SettingsVersion:", instance.Settings.SettingsVersion,
-                )
-      //fmt.Printf("%#v\n",instance.BackupConfiguration)
+      for _, clusters := range clusternames {
+        if cluster.Name == clusters {
+          fmt.Println("Number:",strconv.Itoa(i),
+                      "Project:", project,
+                      "cluster name:",cluster.Name,
+                      "Location:", cluster.Location,
+                      "Node count:", cluster.CurrentNodeCount,
+        )
+          for _, nodepool := range cluster.NodePools {
+            fmt.Println("Node Pool Name:",nodepool.Name)
+            parentsize := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", project,cluster.Location,cluster.Name,nodepool.Name)
+            fmt.Println(parentsize)
+            resizeClusters, err := gkeresize.ResizeClusters(parentsize,0)
+            if err != nil {
+              log.Fatalln(err)
+            }
+            fmt.Println(resizeClusters.Name)
+          }
+        }
+      }
     }
   }
 }

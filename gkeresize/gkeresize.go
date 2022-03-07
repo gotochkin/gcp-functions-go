@@ -46,3 +46,32 @@ func ListClusters(parent string) (*container.ListClustersResponse, error) {
 	}
 	return clusters, nil
 }
+
+func ResizeClusters(parent string, size int64) (*container.Operation, error) {
+	ctx := context.Background()
+
+	// Create an http.Client that uses Application Default Credentials.
+	hc, err := google.DefaultClient(ctx, container.CloudPlatformScope)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the Google Cloud GKE service that uses Application Default Credentials.
+	service, err := container.New(hc)
+	if err != nil {
+		return nil, err
+	}
+	// Service -> ProjectsService -> ProjectsLocationsService -> List(projectID)  ProjectsLocationsClustersService?
+	//cs. err := 
+
+	// List clusters for the project ID.
+	sizeRequest := &container.SetNodePoolSizeRequest {
+		NodeCount: size,
+	}
+	
+	nodesize, err := service.Projects.Locations.Clusters.NodePools.SetSize(parent,sizeRequest).Do()
+	if err != nil {
+		return nil, err
+	}
+	return nodesize, nil
+}
