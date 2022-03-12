@@ -29,18 +29,22 @@ func ResizeFunc(ctx context.Context, m PubSubMessage) error {
 	//log.Println(string(m.Data))
 	log.Println(string(par.Project))
 	log.Println(string(par.Cluster))
+	log.Println(string(par.Size))
 	//ctx := context.Background()
 	containerService, err := container.NewService(ctx)
 	// sizeRequest := &container.SetNodePoolSizeRequest {
 	// 	NodeCount: size,
 	// }
 	parent := fmt.Sprintf("projects/%s/locations/-", par.Project)
-	clusters, err := containerService.Projects.Locations.Clusters.List(parent).Do()
+	listClusters, err := containerService.Projects.Locations.Clusters.List(parent).Do()
 	if err != nil {
-		return nil, err
+		log.Println(err)
 	}
-	for _, cluster := range clusters {
-		fmt.Println(cluster.Name)
+	fmt.Println(len(listClusters.Clusters))
+	for _, cluster := range listClusters.Clusters {
+		if cluster.Name == par.Cluster {
+			fmt.Println(cluster.Name)
+		}		
 	}
 	fmt.Println(parent)
 	return nil
