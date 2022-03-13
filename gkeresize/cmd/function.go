@@ -48,11 +48,13 @@ func ResizeFunc(ctx context.Context, m PubSubMessage) error {
 		    )
 		    for _, nodepool := range cluster.NodePools {
 			    fmt.Println("Node Pool Name:",nodepool.Name)
-				parentsize := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", par.Project,cluster.Location,cluster.Name,nodepool.Name)
+				parentsize := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", 
+				                          par.Project,cluster.Location,cluster.Name,nodepool.Name)
 				nodesize, err := containerService.Projects.Locations.Clusters.NodePools.SetSize(parentsize,sizeRequest).Do()
 				if err != nil {
 					log.Println(err)
 				}
+				fmt.Println(nodesize)
 		    }
 		}		
 	}
