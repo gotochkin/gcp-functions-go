@@ -19,7 +19,7 @@ type Parameters struct {
 	Cluster string `json:"cluster"`
 	Size int64 `json: size`
 }
-// HelloPubSub consumes a Pub/Sub message.
+// ResizeFunc consumes a Pub/Sub message.
 func ResizeFunc(ctx context.Context, m PubSubMessage) error {
 	var par Parameters 
 	err := json.Unmarshal(m.Data,&par) 
@@ -30,7 +30,7 @@ func ResizeFunc(ctx context.Context, m PubSubMessage) error {
 	log.Println(string(par.Project))
 	log.Println(string(par.Cluster))
 	log.Println(string(par.Size))
-	//ctx := context.Background()
+	// Create context
 	containerService, err := container.NewService(ctx)
 	sizeRequest := &container.SetNodePoolSizeRequest {
 		NodeCount: par.Size,
