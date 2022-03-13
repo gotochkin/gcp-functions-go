@@ -16,11 +16,10 @@ type PubSubMessage struct {
 }
 type Parameters struct {
 	Project string `json:"project"`
-	Cluster string `json:"cluster"`
-	Size int64 `json: size`
+	Operation string `json:"operation"`
 }
-// ResizeFunc consumes a Pub/Sub message.
-func ResizeFunc(ctx context.Context, m PubSubMessage) error {
+// SQLStartStop consumes a Pub/Sub message.
+func SQLStartStop(ctx context.Context, m PubSubMessage) error {
 	var par Parameters 
 	err := json.Unmarshal(m.Data,&par) 
 	if err != nil {
@@ -28,13 +27,16 @@ func ResizeFunc(ctx context.Context, m PubSubMessage) error {
 	}
 	//log.Println(string(m.Data))
 	log.Println(string(par.Project))
-	log.Println(string(par.Cluster))
-	log.Println(string(par.Size))
+	log.Println(string(par.Operation))
 	// Create context
-	containerService, err := container.NewService(ctx)
-	sizeRequest := &container.SetNodePoolSizeRequest {
-		NodeCount: par.Size,
+	sqlService, err := sqladmin.NewService(ctx)
+	mysetting := &sqladmin.Settings{
+		ActivationPolicy: par.Operation,
 	}
+	instance := &sqladmin.DatabaseInstance{
+		Settings: mysetting,
+	}
+	// -->continue from here
 	parent := fmt.Sprintf("projects/%s/locations/-", par.Project)
 	listClusters, err := containerService.Projects.Locations.Clusters.List(parent).Do()
 	if err != nil {
