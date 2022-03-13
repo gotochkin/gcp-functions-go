@@ -32,9 +32,9 @@ func ResizeFunc(ctx context.Context, m PubSubMessage) error {
 	log.Println(string(par.Size))
 	//ctx := context.Background()
 	containerService, err := container.NewService(ctx)
-	// sizeRequest := &container.SetNodePoolSizeRequest {
-	// 	NodeCount: size,
-	// }
+	sizeRequest := &container.SetNodePoolSizeRequest {
+		NodeCount: par.Size,
+	}
 	parent := fmt.Sprintf("projects/%s/locations/-", par.Project)
 	listClusters, err := containerService.Projects.Locations.Clusters.List(parent).Do()
 	if err != nil {
@@ -43,9 +43,19 @@ func ResizeFunc(ctx context.Context, m PubSubMessage) error {
 	fmt.Println(len(listClusters.Clusters))
 	for _, cluster := range listClusters.Clusters {
 		if cluster.Name == par.Cluster {
-			fmt.Println(cluster.Name)
+			fmt.Println("cluster name:",cluster.Name,
+			            "Node count:", cluster.CurrentNodeCount,
+		    )
+		    for _, nodepool := range cluster.NodePools {
+			    fmt.Println("Node Pool Name:",nodepool.Name)
+				parentsize := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", par.Project,cluster.Location,cluster.Name,nodepool.Name)
+				nodesize, err := containerService.Projects.Locations.Clusters.NodePools.SetSize(parentsize,sizeRequest).Do()
+				if err != nil {
+					log.Println(err)
+				}
+		    }
 		}		
 	}
-	fmt.Println(parent)
+	fmt.Println("Done")
 	return nil
 }
