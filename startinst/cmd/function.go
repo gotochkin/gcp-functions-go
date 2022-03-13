@@ -1,3 +1,16 @@
+// Copyright 2022 Gleb Otochkin
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 /// Package p contains a Pub/Sub Cloud Function.
 package p
 
@@ -30,35 +43,39 @@ func SQLStartStop(ctx context.Context, m PubSubMessage) error {
 	log.Println(string(par.Operation))
 	// Create context
 	sqlService, err := sqladmin.NewService(ctx)
-	mysetting := &sqladmin.Settings{
-		ActivationPolicy: par.Operation,
-	}
-	instance := &sqladmin.DatabaseInstance{
-		Settings: mysetting,
-	}
-	// -->continue from here
-	parent := fmt.Sprintf("projects/%s/locations/-", par.Project)
-	listClusters, err := containerService.Projects.Locations.Clusters.List(parent).Do()
+	// List instances for the project ID.
+	listInstances, err := sqlService.Instances.List(par.Project).Do()
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(len(listClusters.Clusters))
-	for _, cluster := range listClusters.Clusters {
-		if cluster.Name == par.Cluster {
-			fmt.Println("cluster name:",cluster.Name,
-			            "Node count:", cluster.CurrentNodeCount,
-		    )
-		    for _, nodepool := range cluster.NodePools {
-			    fmt.Println("Node Pool Name:",nodepool.Name)
-				parentsize := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/nodePools/%s", 
-				                          par.Project,cluster.Location,cluster.Name,nodepool.Name)
-				nodesize, err := containerService.Projects.Locations.Clusters.NodePools.SetSize(parentsize,sizeRequest).Do()
-				if err != nil {
-					log.Println(err)
-				}
-				fmt.Println(nodesize)
-		    }
-		}		
+	for _, instance := range listInstances.Items {
+		fmt.Println(instance.Name)
+		if par.Operation == "stop" {
+			mysetting := &sqladmin.Settings{
+				ActivationPolicy: "Never",
+			}
+			inst := &sqladmin.DatabaseInstance{
+				Settings: mysetting,
+			}
+			op, err := sqlService.Instances.Patch(par.Project, instance.Name, inst).Do()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			fmt.Println(op.Status)
+		}
+		if par.Operation == "start" {
+			mysetting := &sqladmin.Settings{
+				ActivationPolicy: "Always",
+			}
+			inst := &sqladmin.DatabaseInstance{
+				Settings: mysetting,
+			}
+			op, err := sqlService.Instances.Patch(par.Project, instance.Name, inst).Do()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			fmt.Println(op.Status)
+		}
 	}
 	fmt.Println("Done")
 	return nil

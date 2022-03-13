@@ -1,10 +1,10 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Gleb Otochkin
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,22 +35,11 @@ func BackupInstance(projectId string, instanceName string) (*sqladmin.Operation,
 	if err != nil {
 		return nil, err
 	}
-
-	//mysetting := &sqladmin.Settings{
-	//	ActivationPolicy: "Always",
-	//}
-
 	backuprun := &sqladmin.BackupRun{
 		Location: "us-central1",
 		Description: "Test us-central1",
 	}
-	//if err != nil {
-	//	return nil, err
-	//}
 	op, err := service.BackupRuns.Insert(projectId, instanceName, backuprun).Do()
-	//(o *Settings.ActivationPolicy) {
-	//	o := "Always"
-	//}
 	if err != nil {
 		return nil, err
 	}
