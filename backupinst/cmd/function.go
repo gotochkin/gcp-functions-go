@@ -53,7 +53,7 @@ func SQLBackup(ctx context.Context, m PubSubMessage) error {
 		Description: par.Description,
 	}
 
-	op, err := service.BackupRuns.Insert(par.Project, par.Instance, backuprun).Do()
+	op, err := sqlService.BackupRuns.Insert(par.Project, par.Instance, backuprun).Do()
 	if err != nil {
 		log.Println(err)
 	}
