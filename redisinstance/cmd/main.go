@@ -13,27 +13,31 @@
 // limitations under the License.
 package main
 import (
-  "gleb.ca/startinstance"
+  "gleb.ca/redisinstance"
   "fmt"
-  //"strconv"
+  "strconv"
   "log"
 )
 func main() {
   projects := [...]string{
     "gleb-sandbox",
   }
-  instances := [...]string{
-    "mssqlinst01std-02-gleb-sandbox-01",
-  }
+  // instances := [...]string{
+  //   "mssqlinst01std-02-gleb-sandbox-01",
+  // }
 
   for _, project := range projects {
-    for _, instance := range instances {
-      Instance, err := startinstance.StartInstance(project,instance)
-      if err != nil {
-        log.Fatalln(err)
-      }
-      fmt.Println(Instance)
+    parent := fmt.Sprintf("projects/%s/locations/-", project)
+    listInstances, err := redisinstance.ListInstances(parent) 
+    if err != nil {
+      log.Fatalln(err)
+    }
+    for i, instance := range listInstances.Instances {
+      fmt.Println("Number:",strconv.Itoa(i),
+                      "Project:", project,
+                      "Instance name:",instance.Name,
+    )
     }
   }
+  fmt.Println("Done")
 }
-
