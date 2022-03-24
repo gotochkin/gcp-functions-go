@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	sqladmin "google.golang.org/api/sqladmin/v1beta4"
+	redis "google.golang.org/api/redis/v1"
 )
 
 // PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
@@ -29,10 +29,10 @@ type PubSubMessage struct {
 }
 type Parameters struct {
 	Project string `json:"project"`
-	Operation string `json:"operation"`
+	Instances string `json:"instances"`
 }
-// SQLStartStop consumes a Pub/Sub message.
-func SQLStartStop(ctx context.Context, m PubSubMessage) error {
+// RedisFunc consumes a Pub/Sub message.
+func RedisFunc(ctx context.Context, m PubSubMessage) error {
 	var par Parameters 
 	err := json.Unmarshal(m.Data,&par) 
 	if err != nil {
@@ -40,42 +40,26 @@ func SQLStartStop(ctx context.Context, m PubSubMessage) error {
 	}
 	//log.Println(string(m.Data))
 	log.Println(string(par.Project))
-	log.Println(string(par.Operation))
+	log.Println(string(par.Instances))
 	// Create context
-	sqlService, err := sqladmin.NewService(ctx)
-	// List instances for the project ID.
-	listInstances, err := sqlService.Instances.List(par.Project).Do()
+	redisService, err := redis.NewService(ctx)
+	parent := fmt.Sprintf("projects/%s/locations/-", par.Project)
+	listInstances, err := redisService.Projects.Locations.Instances.List(parent).Do()
 	if err != nil {
 		log.Println(err)
 	}
-	for _, instance := range listInstances.Items {
-		fmt.Println(instance.Name)
-		if par.Operation == "stop" {
-			mysetting := &sqladmin.Settings{
-				ActivationPolicy: "Never",
-			}
-			inst := &sqladmin.DatabaseInstance{
-				Settings: mysetting,
-			}
-			op, err := sqlService.Instances.Patch(par.Project, instance.Name, inst).Do()
+	fmt.Println(len(listInstances.Instances))
+	if par.Instances == "ALL" {
+		for _, instance := range listInstances.Instances {
+			parentdelete := fmt.Sprintf("projects/%s/locations/%s/instances/%s", par.Project,instance.LocationId,instance.Name)
+			fmt.Println(parentdelete)
+			instancedelete, err := redisService.Projects.Locations.Instances.Delete(parentdelete).Do()
 			if err != nil {
-				log.Fatalln(err)
+				log.Println(err)
 			}
-			fmt.Println(op.Status)
+			fmt.Println(instancedelete)
 		}
-		if par.Operation == "start" {
-			mysetting := &sqladmin.Settings{
-				ActivationPolicy: "Always",
-			}
-			inst := &sqladmin.DatabaseInstance{
-				Settings: mysetting,
-			}
-			op, err := sqlService.Instances.Patch(par.Project, instance.Name, inst).Do()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Println(op.Status)
-		}
+		fmt.Println("Deleted")
 	}
 	fmt.Println("Done")
 	return nil
