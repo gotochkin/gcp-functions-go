@@ -16,29 +16,37 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
 
-	"gleb.ca/listinstances"
+	"gleb.ca/gcestartstop"
+	//"strconv"
 )
 
 func main() {
 	projects := [...]string{
 		"gleb-sandbox",
 	}
+	// instances := [...]string{
+	// 	"gleb-sandbox-1",
+	// }
+
 	for _, project := range projects {
-		listInstances, err := listinstances.ListInstances(project)
+		// for _, instance := range instances {
+		// 	Instance, err := gcestartstop.StartInstance(project, instance)
+		// 	if err != nil {
+		// 		log.Fatalln(err)
+		// 	}
+		// 	fmt.Println(Instance)
+		// }
+		instancesScopedList, err := gcestartstop.ListInstances(project)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		for i, instance := range listInstances {
-			//fmt.Printf("Number: %s instance name: %s\n",strconv.Itoa(i),instance.Name)
-			fmt.Println("Number:", strconv.Itoa(i),
-				"instance name:", instance.Name,
-				"State:", instance.State,
-				"Settings.ActivationPolicy:", instance.Settings.ActivationPolicy,
-				"Settings.SettingsVersion:", instance.Settings.SettingsVersion,
-			)
-			fmt.Printf("%#v\n", instance.BackupConfiguration)
+		fmt.Println(instancesScopedList)
+		for instances, err := range instancesScopedList.Instances {
+			fmt.Println(instance)
+			// for instance, err := range instancesScopedList.Instances {
+			// 	fmt.Println(instance)
+			// }
 		}
 	}
 }
