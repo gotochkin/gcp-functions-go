@@ -46,12 +46,8 @@ func main() {
 			if len(instances.Instances) > 0 {
 				fmt.Println(zone)
 				fmt.Println(len(instances.Instances))
-				for instance, err := range instances.Instances {
-					if err != nil {
-						//log.Fatalln(err)
-						fmt.Println(err)
-					}
-					fmt.Println(instance)
+				for _, instance := range instances.Instances {
+					fmt.Println(instance.Name + " "+instance.Status)
 				}
 			}
 		}
