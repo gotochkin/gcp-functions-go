@@ -41,12 +41,19 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Println(instancesScopedList)
-		for instances, err := range instancesScopedList.Instances {
-			fmt.Println(instance)
-			// for instance, err := range instancesScopedList.Instances {
-			// 	fmt.Println(instance)
-			// }
+		//fmt.Println(instancesScopedList)
+		for zone, instances := range instancesScopedList {
+			if len(instances.Instances) > 0 {
+				fmt.Println(zone)
+				fmt.Println(len(instances.Instances))
+				for instance, err := range instances.Instances {
+					if err != nil {
+						//log.Fatalln(err)
+						fmt.Println(err)
+					}
+					fmt.Println(instance)
+				}
+			}
 		}
 	}
 }
