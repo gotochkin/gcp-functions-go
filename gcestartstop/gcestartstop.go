@@ -50,23 +50,34 @@ func ListInstances(projectId string) (map[string]compute.InstancesScopedList, er
 	return instanceAggregatedList.Items, nil
 }
 
-// func StartInstance(projectId string, instanceName string) (*compute.Operation, error) {
-// 	ctx := context.Background()
+func StartInstance(projectId string, zone string, instanceName string) (*compute.Operation, error) {
+	ctx := context.Background()
 
-// 	// Create the Google Compute Engine service.
-// 	computeService, err := compute.NewService(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// Create the Google Compute Engine service.
+	computeService, err := compute.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-// 	for _, instance := range ListInstances(projectId) {
-// 		if instance.Name == instanceName {
-// 			op, err := computeService.Instances.Start(projectId, instanceName, instance.Zone).Do()
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 			return op, nil
-// 		}
-// 	}
-// 	return nil, nil
-// }
+	op, err := computeService.Instances.Start(projectId,zone,instanceName).Do()
+	if err !=nil {
+		return nil, err
+	}
+	return op, nil
+}
+
+func StopInstance(projectId string, zone string, instanceName string) (*compute.Operation, error) {
+	ctx := context.Background()
+
+	// Create the Google Compute Engine service.
+	computeService, err := compute.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	op, err := computeService.Instances.Stop(projectId,zone,instanceName).Do()
+	if err !=nil {
+		return nil, err
+	}
+	return op, nil
+}

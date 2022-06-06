@@ -17,9 +17,10 @@ package p
 import (
 	"encoding/json"
 	"context"
+	"strings"
 	"fmt"
 	"log"
-	sqladmin "google.golang.org/api/sqladmin/v1beta4"
+	compute "google.golang.org/api/compute/v1"
 )
 
 // PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
@@ -32,7 +33,7 @@ type Parameters struct {
 	Operation string `json:"operation"`
 }
 // SQLStartStop consumes a Pub/Sub message.
-func SQLStartStop(ctx context.Context, m PubSubMessage) error {
+func GCEStartStop(ctx context.Context, m PubSubMessage) error {
 	var par Parameters 
 	err := json.Unmarshal(m.Data,&par) 
 	if err != nil {
@@ -42,41 +43,37 @@ func SQLStartStop(ctx context.Context, m PubSubMessage) error {
 	log.Println(string(par.Project))
 	log.Println(string(par.Operation))
 	// Create context
-	sqlService, err := sqladmin.NewService(ctx)
-	// List instances for the project ID.
-	listInstances, err := sqlService.Instances.List(par.Project).Do()
+	computeService, err := compute.NewService(ctx)
+	// Aggregated list instances for the project ID.
+	instanceAggregatedList, err := computeService.Instances.AggregatedList(par.Project).Do()
 	if err != nil {
 		log.Println(err)
 	}
-	for _, instance := range listInstances.Items {
-		fmt.Println(instance.Name)
-		if par.Operation == "stop" {
-			mysetting := &sqladmin.Settings{
-				ActivationPolicy: "Never",
+	for zone, instances := range instanceAggregatedList.Items {
+		//
+		if len(instances.Instances) > 0 {
+			zonename := strings.Split(zone,"/")
+			for _, instance := range instances.Instances {
+				//fmt.Println(instance.Name + " " + instance.Status)
+				if instance.Status == "RUNNING" && par.Operation == "Stop" {
+					//fmt.Println(project + " " + zonename[1] + " " + instance.Name)
+					op, err := computeService.Instances.Stop(par.Project,zonename[1],instance.Name).Do()
+					if err !=nil {
+						log.Println(err)
+					}
+					fmt.Println(op.Status)
+				} else if instance.Status == "TERMINATED" && par.Operation == "Start" {
+					//fmt.Println(project + " " + zonename[1] + " " + instance.Name)
+					op, err := computeService.Instances.Start(par.Project,zonename[1],instance.Name).Do()
+					if err !=nil {
+						log.Println(err)
+					}
+					fmt.Println(op.Status)
+				}
 			}
-			inst := &sqladmin.DatabaseInstance{
-				Settings: mysetting,
-			}
-			op, err := sqlService.Instances.Patch(par.Project, instance.Name, inst).Do()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Println(op.Status)
-		}
-		if par.Operation == "start" {
-			mysetting := &sqladmin.Settings{
-				ActivationPolicy: "Always",
-			}
-			inst := &sqladmin.DatabaseInstance{
-				Settings: mysetting,
-			}
-			op, err := sqlService.Instances.Patch(par.Project, instance.Name, inst).Do()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Println(op.Status)
 		}
 	}
+	
 	fmt.Println("Done")
 	return nil
 }

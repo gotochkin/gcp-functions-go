@@ -16,6 +16,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"gleb.ca/gcestartstop"
 	//"strconv"
@@ -44,10 +45,19 @@ func main() {
 		//fmt.Println(instancesScopedList)
 		for zone, instances := range instancesScopedList {
 			if len(instances.Instances) > 0 {
-				fmt.Println(zone)
-				fmt.Println(len(instances.Instances))
+				//fmt.Println(zone)
+				//fmt.Println(len(instances.Instances))
 				for _, instance := range instances.Instances {
 					fmt.Println(instance.Name + " "+instance.Status)
+					if instance.Status == "RUNNING" {
+						zonename := strings.Split(zone,"/")
+						fmt.Println(project + " " + zonename[1] + " " + instance.Name)
+						op, err := gcestartstop.StopInstance(project,zonename[1],instance.Name)
+						if err != nil {
+							log.Fatalln(err)
+						}
+						fmt.Println(op.Status)
+					}
 				}
 			}
 		}
