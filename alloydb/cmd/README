@@ -1,0 +1,10 @@
+The function deletebackup.go is created and tested for GCP Function gen 2 and works in collaboration with PUB/SUB
+The PUB?SUB topic message is a JSON with 5 parameters
+project - project name
+location - backups location
+operation - "DELETE" or "LIST" - the latter can be used for tests
+cluster - AlloyDB cluster name or "ALL" for all backups in the project
+retention - retention in days, the backups older than the retention will be deleted 
+
+Here is an example of a message
+{ "project":"sandbox",  "location":"us-central1", "operation":"DELETE", "cluster":"test-alloydb-01", "retention":107}
