@@ -60,14 +60,13 @@ type Backup struct {
 }
 
 func operBackup(ctx context.Context, project string, location string, cluster string, operation string, retention int, state string) {
-	//
-	backupsUrl := "https://alloydb.googleapis.com/v1beta/projects/" + project + "/locations/" + location + "/backups"
 	// Get default credentials
 	//ctx := context.Background()
 	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		log.Fatal(err)
 	}
+	backupsUrl := "https://alloydb.googleapis.com/v1beta/projects/" + project + "/locations/" + location + "/backups"
 	listBackups, err := http.NewRequest("GET", backupsUrl, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -76,6 +75,7 @@ func operBackup(ctx context.Context, project string, location string, cluster st
 	if err != nil {
 		log.Fatal(err)
 	}
+	//The io.ReadAll operation can be optimized using different approach
 	listBackupBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -91,13 +91,6 @@ func operBackup(ctx context.Context, project string, location string, cluster st
 		}
 		if t1.Sub(t2) > 0 && backup.State == state {
 			if cluster == "ALL" {
-				// Debug
-				// fmt.Println(backup.ClusterName)
-				// fmt.Println(backup.CreateTime)
-				// fmt.Println(t2)
-				// fmt.Println(t1)
-				// fmt.Println(backup.Name)
-				// Delete the backup
 				backupUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
 				operateBackup, err := http.NewRequest(operation, backupUrl, nil)
 				if err != nil {
@@ -110,13 +103,6 @@ func operBackup(ctx context.Context, project string, location string, cluster st
 				fmt.Println(resp)
 
 			} else if cluster == strings.Split(backup.ClusterName, "/")[5] {
-				// Debug
-				// fmt.Println(backup.ClusterName)
-				// fmt.Println(backup.CreateTime)
-				// fmt.Println(t2)
-				// fmt.Println(t1)
-				// fmt.Println(backup.Name)
-				// Delete the backup
 				backupUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
 				operateBackup, err := http.NewRequest(operation, backupUrl, nil)
 				if err != nil {
