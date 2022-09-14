@@ -15,6 +15,7 @@
 package p
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -58,19 +59,8 @@ type Backup struct {
 	Etag        string `json:"etag"`
 }
 
-func DeleteAlloyDBBackups(ctx context.Context, m PubSubMessage) error {
-	//Parameters
-	var par Parameters
-	err := json.Unmarshal(m.Data, &par)
-	if err != nil {
-		log.Println(err)
-	}
-	project := par.Project
-	location := par.Location
-	state := "READY"
-	cluster := par.Cluster
-	retention := par.Retention
-	retention = -(retention)
+func operBackup(ctx context.Context, project string, location string, cluster string, operation string, retention int, state string) {
+	//
 	backupsUrl := "https://alloydb.googleapis.com/v1beta/projects/" + project + "/locations/" + location + "/backups"
 	// Get default credentials
 	//ctx := context.Background()
@@ -108,12 +98,12 @@ func DeleteAlloyDBBackups(ctx context.Context, m PubSubMessage) error {
 				// fmt.Println(t1)
 				// fmt.Println(backup.Name)
 				// Delete the backup
-				deleteUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
-				deleteBackup, err := http.NewRequest("DELETE", deleteUrl, nil)
+				backupUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
+				operateBackup, err := http.NewRequest(operation, backupUrl, nil)
 				if err != nil {
 					log.Fatal(err)
 				}
-				resp, err := client.Do(deleteBackup)
+				resp, err := client.Do(operateBackup)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -127,12 +117,12 @@ func DeleteAlloyDBBackups(ctx context.Context, m PubSubMessage) error {
 				// fmt.Println(t1)
 				// fmt.Println(backup.Name)
 				// Delete the backup
-				deleteUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
-				deleteBackup, err := http.NewRequest(par.Operation, deleteUrl, nil)
+				backupUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
+				operateBackup, err := http.NewRequest(operation, backupUrl, nil)
 				if err != nil {
 					log.Fatal(err)
 				}
-				resp, err := client.Do(deleteBackup)
+				resp, err := client.Do(operateBackup)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -141,6 +131,50 @@ func DeleteAlloyDBBackups(ctx context.Context, m PubSubMessage) error {
 
 		}
 	}
+}
+func createBackup(ctx context.Context, project string, location string, cluster string, operation string) {
+	// Get default credentials
+	//ctx := context.Background()
+	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	if err != nil {
+		log.Fatal(err)
+	}
+	backupsUrl := "https://alloydb.googleapis.com/v1beta/projects/" + project + "/locations/" + location + "/backups/?backupId=on-demand-bkp-" + time.Now().Format("2006-01-02-150405")
+	jsonVal := map[string]string{"clusterName": "projects/" + project + "/locations/" + location + "/clusters/" + cluster, "type": "ON_DEMAND"}
+	backupJSON, _ := json.Marshal(jsonVal)
+	createBackup, err := http.NewRequest("POST", backupsUrl, bytes.NewBuffer(backupJSON))
+	createBackup.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp, err := client.Do(createBackup)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp)
+}
+
+func ManageAlloyDBBackups(ctx context.Context, m PubSubMessage) error {
+	//Parameters
+	var par Parameters
+	err := json.Unmarshal(m.Data, &par)
+	if err != nil {
+		log.Println(err)
+	}
+	project := par.Project
+	location := par.Location
+	state := "READY"
+	cluster := par.Cluster
+	operation := par.Operation
+	retention := par.Retention
+	retention = -(retention)
+	if operation == "DELETE" || operation == "LIST" {
+		//
+		operBackup(ctx, project, location, cluster, operation, retention, state)
+	} else if operation == "CREATE" {
+		createBackup(ctx, project, location, cluster, operation)
+	}
+
 	fmt.Println("Done")
 	return nil
 }

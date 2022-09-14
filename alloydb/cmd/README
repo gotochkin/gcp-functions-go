@@ -6,5 +6,9 @@ operation - "DELETE" or "LIST" - the latter can be used for tests
 cluster - AlloyDB cluster name or "ALL" for all backups in the project
 retention - retention in days, the backups older than the retention will be deleted 
 
-Here is an example of a message
+Here is an example of a message to delete all backups of the test-alloydb-01 cluster in the sandbox project older than 107 days:
 { "project":"sandbox",  "location":"us-central1", "operation":"DELETE", "cluster":"test-alloydb-01", "retention":107}
+To list backups 
+{ "project":"sandbox",  "location":"us-central1", "operation":"DELETE", "cluster":"test-alloydb-01", "retention":107}
+to create a new backup for a cluster
+{ "project":"sandbox",  "location":"us-central1", "operation":"CREATE", "cluster":"test-alloydb-01", "retention":0}
