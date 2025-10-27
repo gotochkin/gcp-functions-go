@@ -4,14 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-/// Package p contains a Pub/Sub Cloud Function.
+// / Package p contains a Pub/Sub Cloud Function.
 package p
 
 import (
@@ -56,6 +56,7 @@ type Backup struct {
 	Description string `json:"description"`
 	ClusterName string `json:"clusterName"`
 	Reconciling bool   `json:"reconciling"`
+	ExpiryTime  string `json:"expiryTime"`
 	Etag        string `json:"etag"`
 }
 
@@ -82,37 +83,55 @@ func operBackup(ctx context.Context, project string, location string, cluster st
 	}
 	//
 	backups := Backups{}
-	err = json.Unmarshal(listBackupBody, &backups)
+	if err := json.Unmarshal(listBackupBody, &backups); err != nil {
+		log.Fatal(err)
+	}
 	t1 := time.Now().AddDate(0, 0, retention)
+	fmt.Printf("Searching for backups older than: %v\n", t1.Format("2006-01-02"))
+	count := 0
 	for _, backup := range backups.Backups {
 		t2, err := time.Parse(time.RFC3339, backup.CreateTime)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error parsing time for backup %s: %v", backup.Name, err)
+			continue
+		}
+		t3, err := time.Parse(time.RFC3339, backup.ExpiryTime)
+		if err != nil {
+			log.Printf("Error parsing expiryTime for backup %s: %v", backup.Name, err)
+			continue
 		}
 		if t1.Sub(t2) > 0 && backup.State == state {
-			if cluster == "ALL" {
-				backupUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
-				operateBackup, err := http.NewRequest(operation, backupUrl, nil)
-				if err != nil {
-					log.Fatal(err)
+			currentClusterId := strings.Split(backup.ClusterName, "/")[5]
+			if cluster == "ALL" || cluster == currentClusterId {
+				count++
+				if operation == "LIST" {
+					// Just print details, don't make an API call
+					fmt.Printf("[LIST] Found Backup: %s \n\tCluster: %s \n\tCreated: %s\n",
+						backup.Name, currentClusterId, backup.CreateTime)
+				} else {
+					// Handle DELETE (or other operational verbs)
+					fmt.Printf("[%s] Performing operation on: %s\n", operation, backup.Name)
+					if t1.Sub(t3) < 0 && operation == "DELETE" {
+						log.Printf("Cannot %s backup %s: before its expiration day: %v", operation, backup.Name, t3)
+						continue
+					}
+					backupUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
+					operateBackupReq, err := http.NewRequest(operation, backupUrl, nil)
+					if err != nil {
+						log.Fatal(err)
+					}
+					opResp, err := client.Do(operateBackupReq)
+					if err != nil {
+						log.Printf("Failed to %s backup %s: %v", operation, backup.Name, err)
+						continue
+					} else if opResp.Status != "200" {
+						log.Printf("Failed to %s backup %s: %v", operation, backup.Name, err)
+						continue
+					}
+					// It's good practice to close these response bodies too, even if we don't read them fully
+					opResp.Body.Close()
+					fmt.Printf("Operation %s response status: %s\n", operation, opResp.Status)
 				}
-				resp, err := client.Do(operateBackup)
-				if err != nil {
-					log.Fatal(err)
-				}
-				fmt.Println(resp)
-
-			} else if cluster == strings.Split(backup.ClusterName, "/")[5] {
-				backupUrl := "https://alloydb.googleapis.com/v1beta/" + backup.Name
-				operateBackup, err := http.NewRequest(operation, backupUrl, nil)
-				if err != nil {
-					log.Fatal(err)
-				}
-				resp, err := client.Do(operateBackup)
-				if err != nil {
-					log.Fatal(err)
-				}
-				fmt.Println(resp)
 			}
 
 		}
