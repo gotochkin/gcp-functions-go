@@ -29,6 +29,7 @@ Run the tool using `go run main.go` followed by the required flags.
 | `-operation`| Action to perform: `CREATE`, `DELETE`, `LIST`. | Yes |
 | `-cluster` | AlloyDB Cluster ID. Use `ALL` for maintenance ops across all clusters in the location. | Yes (for CREATE) |
 | `-retention`| Retention days for cleaning up old backups. Defaults to 30. | No (optional) |
+| `-debug` | Enable debug logging. | No (optional) |
 
 ### Examples
 
@@ -40,7 +41,8 @@ go run main.go \
   -project=my-gcp-project-id \
   -location=us-central1 \
   -cluster=my-alloydb-cluster \
-  -operation=CREATE
+  -operation=CREATE \
+  -debug=false
 ```
 
 #### 2. Delete Old Backups (Retention policy)
@@ -62,4 +64,15 @@ go run main.go \
   -location=us-central1 \
   -cluster=my-alloydb-cluster \
   -operation=DELETE
+```
+
+#### 4. List backups with debug enabled
+Lists backups with additional debug information.
+```bash
+go run main.go \
+  -project=my-gcp-project-id \
+  -location=us-central1 \
+  -cluster=my-alloydb-cluster \
+  -operation=LIST 
+  -debug=true
 ```

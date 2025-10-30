@@ -1,14 +1,15 @@
 The function deletebackup.go is created and tested for GCP Function gen 2 and works in collaboration with PUB/SUB
-The PUB?SUB topic message is a JSON with 5 parameters
+The PUB?SUB topic message is a JSON with 6 parameters
 project - project name
 location - backups location
 operation - "DELETE" or "LIST" - the latter can be used for tests
 cluster - AlloyDB cluster name or "ALL" for all backups in the project
-retention - retention in days, the backups older than the retention will be deleted 
+retention - retention in days, the backups older than the retention will be deleted
+debug - true or false, to enable debug logging
 
 Here is an example of a message to delete all backups of the test-alloydb-01 cluster in the sandbox project older than 107 days:
-{ "project":"sandbox",  "location":"us-central1", "operation":"DELETE", "cluster":"test-alloydb-01", "retention":107}
+{ "project":"sandbox",  "location":"us-central1", "operation":"DELETE", "cluster":"test-alloydb-01", "retention":107, "debug":true}
 To list backups 
-{ "project":"sandbox",  "location":"us-central1", "operation":"DELETE", "cluster":"test-alloydb-01", "retention":107}
+{ "project":"sandbox",  "location":"us-central1", "operation":"LIST", "cluster":"test-alloydb-01", "retention":107, "debug":true}
 to create a new backup for a cluster
-{ "project":"sandbox",  "location":"us-central1", "operation":"CREATE", "cluster":"test-alloydb-01", "retention":0}
+{ "project":"sandbox",  "location":"us-central1", "operation":"CREATE", "cluster":"test-alloydb-01", "retention":0, "debug":false}
