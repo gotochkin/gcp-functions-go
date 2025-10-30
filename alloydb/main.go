@@ -31,6 +31,7 @@ func main() {
 	operation := flag.String("operation", "LIST", "Operation to perform: CREATE, DELETE, or LIST (Required)")
 	cluster := flag.String("cluster", "ALL", "AlloyDB Cluster ID, or 'ALL' for maintenance operations")
 	retention := flag.Int("retention", 365, "Retention period in days (used for DELETE/LIST operations)")
+	debug := flag.Bool("debug", false, "Enable debug logging")
 
 	// Custom usage message
 	flag.Usage = func() {
@@ -54,6 +55,7 @@ func main() {
 		Operation: *operation,
 		Cluster:   *cluster,
 		Retention: *retention,
+		Debug:     *debug,
 	}
 
 	// Serialize parameters to JSON to mimic the Pub/Sub data payload
